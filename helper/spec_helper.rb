@@ -1,5 +1,5 @@
 require 'rubygems'
-require 'spec'
+require 'rspec'
 require 'rest_client'
 require 'json'
 require 'siren'

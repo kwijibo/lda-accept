@@ -29,7 +29,7 @@ shared_examples_for "All JSON Requests" do
     end
 
     it "should refer to its definition" do 
-     query(@response, "$.result.definition").should_not be_nil
+     query(@response, "$.result.isPartOf.definition").should_not be_nil
     end
 
 end

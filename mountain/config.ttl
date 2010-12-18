@@ -12,30 +12,82 @@
 @prefix spec: <http://www.epimorphics.com/examples/specSchools#> .
 @prefix climb: <http://climb.dataincubator.org/vocabs/climb/> .
 
-<#MyAPI> a api:API ;
-	rdfs:label "Test API"@en ;
+<#ClimbingAPI> a api:API ;
+	rdfs:label "Climbing Data"@en ;
+#	api:base "http://localhost" ;
 	api:maxPageSize "50";
 	api:defaultPageSize "10" ;
 	api:endpoint [
 		a api:ItemEndpoint ;
-		api:uriTemplate "/Mountain/{name}" ;
-	    api:itemTemplate "http://dbpedia.org/resource/{name}" 
+		api:uriTemplate "/Climbing/Mountain/{name}" ;
+	    api:itemTemplate "http://dbpedia.org/resource/{name}" ;
+		api:exampleRequestPath "/Climbing/Mountain/Ben_Nevis"
 		], 
-		<#routesEndpoint> , <#HVSRoutes> ;
+		<#routesEndpoint> , <#routesByGrade> , <#routesByStyle> ;
 	api:sparqlEndpoint <http://api.talis.com/stores/kwijibo-dev3/services/sparql> ;
-	api:defaultViewer api:describeViewer 
-	.
+	api:defaultViewer api:describeViewer ;
+	api:contentNegotiation api:parameterBased ;
+	api:variable [
+	    api:name "Route" ;
+	    api:value "http://climb.dataincubator.org/vocabs/climb/Route" ;
+	    api:type rdfs:Resource ;
+	  ],
+	[
+		api:name "grade" ;
+		api:value "HVS"
+	] ;
+	api:variable [
+		api:name "styleName" ;
+		api:value ""
+		] ;
+	api:variable [
+		api:name "styleUri" ;
+		api:value "http://climb.dataincubator.org/styles/{styleName}" ;
+		api:type rdfs:Resource
+		] 
+	 .
 
 <#routesEndpoint> a api:ListEndpoint ;
 		api:uriTemplate "/Climbing/Routes" ;
+		api:defaultViewer [
+				api:name "simple" ;
+				api:property rdfs:label, rdf:type
+			] ;
 		api:selector [
 			api:where " ?item a climb:Route "
-#			api:filter "type=Route"
+#			api:filter "type={Route}"
 		] .
 
-<#HVSRoutes> a api:ListEndpoint ;
-	api:uriTemplate "/Routes/HVS" ;
+<#routesSelector> api:filter "type={Route}" .
+
+<#routesByGrade> a api:ListEndpoint ;
+	api:uriTemplate "/Climbing/Routes/byGrade/{grade}" ;
+	api:exampleRequestPath "/Climbing/Routes/byGrade/HVS" ;
 	api:selector [
-			api:parent <#routesEndpoint> ;
-			api:filter "type=Route", "grading.value=HVS"
+			api:parent <#routesSelector> ;
+			api:filter "grading.value={grade}"
 		] .
+
+<#routesByStyle> a api:ListEndpoint ;
+	api:uriTemplate "/Climbing/Routes/byStyle/{styleName}" ;
+	api:exampleRequestPath "/Climbing/Routes/byStyle/Trad" ;
+		
+	api:selector [
+		api:parent <#routesSelector> ;
+		api:filter "grading.style={styleUri}"
+		] .
+
+climb:grading a rdf:Property ; 
+		api:label "grading" .
+
+climb:style a rdf:Property ; 
+		api:label "style" .
+
+rdf:value a rdf:Property ;
+	api:label "value" .
+
+rdfs:label a rdf:Property ;
+	api:label "label" .
+
+rdf:type a rdf:Property ;
+	api:label "type" .
